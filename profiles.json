@@ -1,0 +1,60 @@
+{
+  "1": {
+    "name": "jayshreemn",
+    "email": "jayshreemn14@gmail.com",
+    "phone": "7204441380",
+    "preferences": [
+      "culture",
+      "culture",
+      "nature"
+    ]
+  },
+  "2": {
+    "name": "Varshitha V",
+    "email": "varshitha.v.karantha@gmail.com",
+    "phone": "09035275201",
+    "preferences": [
+      "city"
+    ]
+  },
+  "3": {
+    "name": "Varshitha V",
+    "email": "varshitha.v.karantha@gmail.com",
+    "phone": "5678967546",
+    "preferences": [
+      "culture",
+      "city",
+      "culture",
+      "city"
+    ]
+  },
+  "5": {
+    "name": "Jahnavi",
+    "email": "jahnavisuresh.006@gmail.com",
+    "phone": "9900899960",
+    "preferences": [
+      "nature",
+      "mountain"
+    ]
+  },
+  "6": {
+    "name": "",
+    "email": "",
+    "phone": "",
+    "preferences": [
+      "nature",
+      "mountain"
+    ]
+  },
+  "7": {
+    "name": "",
+    "email": "",
+    "phone": "",
+    "preferences": [
+      "beach",
+      "beach",
+      "luxury",
+      "city"
+    ]
+  }
+}
