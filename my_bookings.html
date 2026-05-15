@@ -1,0 +1,426 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>My Bookings — GoWithUs</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    main.bookings-main{
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px 16px 40px;
+    }
+
+    .hero-small{
+      height:90px;
+      min-height:90px;
+      display:flex;
+      align-items:center;
+      background:#fff;
+      border-bottom:1px solid #f1f5f9;
+    }
+    .hero-small-inner{
+      max-width:1100px;
+      margin:0 auto;
+      padding:8px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+    }
+
+    .hero-small h1{
+      margin:0;
+      font-size:22px;
+    }
+    .hero-small .muted{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .user-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:linear-gradient(90deg,#ff3cac,#ff6b6b);
+      color:#fff;
+      font-weight:700;
+      font-size:13px;
+    }
+
+    .bookings-list{
+      margin-top:18px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .booking-card{
+      display:grid;
+      grid-template-columns: 220px minmax(0, 1.6fr) minmax(0, 170px);
+      gap:16px;
+      align-items:stretch;
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 10px 26px rgba(15,23,42,0.06);
+      border:1px solid #e5e7eb;
+      padding:14px;
+    }
+
+    .booking-card img{
+      width:100%;
+      height:140px;
+      object-fit:cover;
+      border-radius:12px;
+      display:block;
+    }
+
+    .booking-meta h3{
+      margin:0 0 4px;
+      font-size:18px;
+    }
+    .muted{
+      color:var(--muted);
+      font-size:13px;
+    }
+    .small{ font-size:13px; }
+
+    .booking-meta .pad{
+      margin-top:4px;
+    }
+
+    .price{
+      font-weight:800;
+      font-size:18px;
+      color:#0f1724;
+    }
+
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:flex-end;
+      justify-content:flex-end;
+    }
+
+    .btn.small{
+      padding:8px 10px;
+      border-radius:10px;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    @media (max-width:900px){
+      .booking-card{
+        grid-template-columns: 1fr;
+      }
+      .booking-card img{
+        height:180px;
+      }
+      .actions{
+        flex-direction:row;
+        justify-content:flex-start;
+        align-items:center;
+        margin-top:6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="wrap header-inner" style="display:flex;align-items:center;justify-content:space-between;">
+      <a class="logo" href="/static/index.html"
+         style="text-decoration:none;font-weight:800;color:var(--accent-b);font-size:18px;">
+        GoWithUs
+      </a>
+      <nav class="site-nav">
+        <a href="/static/index.html">Home</a>
+        <a href="/static/destinations.html">Destinations</a>
+        <a href="/static/my_bookings.html" class="active">My Bookings</a>
+        <a href="/static/profile.html">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Small hero -->
+  <section class="hero-small">
+    <div class="hero-small-inner">
+      <div>
+        <h1>My Bookings</h1>
+        <div class="muted">View, download invoices, or cancel bookings from your account.</div>
+      </div>
+      <div class="top-actions">
+        <div id="user-pill-area"></div>
+        <button id="auth-btn" class="btn">Login</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="bookings-main">
+    <section>
+      <div id="msg-global" class="muted small" aria-live="polite"></div>
+      <div id="bookings-container" class="bookings-list" aria-live="polite"></div>
+      <div id="no-bookings" class="muted small" style="margin-top:12px;display:none;">
+        You don't have any bookings yet.
+      </div>
+    </section>
+  </main>
+
+  <footer style="padding:20px 0;text-align:center;color:var(--muted);font-size:13px;">
+    © GoWithUs — demo layout
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+  <script>
+    // ------------ helper -------------
+    function escapeHtml(s){
+      if (s === undefined || s === null) return '';
+      return String(s).replace(/[&<>"']/g, m =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+      );
+    }
+
+    // ------------ user pill + auth -------------
+    function refreshUserUI(){
+      const userId = localStorage.getItem('gowithus_user_id');
+      const uName = localStorage.getItem('gowithus_user_name') || '';
+      const uEmail = localStorage.getItem('gowithus_user_email') || '';
+      const pillArea = document.getElementById('user-pill-area');
+      const authBtn = document.getElementById('auth-btn');
+
+      pillArea.innerHTML = '';
+      if (userId){
+        const pill = document.createElement('div');
+        pill.className = 'user-pill';
+        pill.textContent = uName ? (uName.length > 20 ? uName.slice(0,18)+'…' : uName) : (uEmail || 'User');
+        pillArea.appendChild(pill);
+
+        authBtn.textContent = 'Logout';
+        authBtn.onclick = () => {
+          localStorage.removeItem('gowithus_user_id');
+          refreshUserUI();
+          loadBookings();
+        };
+      } else {
+        const txt = document.createElement('div');
+        txt.className = 'muted small';
+        txt.textContent = 'Not signed in';
+        pillArea.appendChild(txt);
+
+        authBtn.textContent = 'Login';
+        authBtn.onclick = () => { location.href = '/static/login.html'; };
+      }
+    }
+
+    // ------------ load bookings -------------
+    async function loadBookings(containerSelector = '#bookings-container'){
+      const container = document.querySelector(containerSelector);
+      const noBookings = document.getElementById('no-bookings');
+      const msg = document.getElementById('msg-global');
+
+      container.innerHTML = '';
+      noBookings.style.display = 'none';
+      msg.textContent = '';
+
+      const uid = localStorage.getItem('gowithus_user_id');
+
+      if (!uid){
+        msg.textContent = 'Log in to see bookings linked with your account. Bookings made as a guest are only stored on this device.';
+      }
+
+      // Try server bookings if signed in
+      if (uid && window.fetch){
+        try{
+          const res = await fetch('/api/my-bookings', { headers:{'X-User-Id':uid} });
+          if (res.ok){
+            const list = await res.json();
+            if (list && list.length){
+              renderList(container, list);
+              return;
+            }
+          } else if (res.status === 401 || res.status === 403){
+            msg.textContent = 'Please log in again to view your account bookings.';
+          } else {
+            msg.textContent = 'Could not fetch server bookings, showing local bookings.';
+          }
+        }catch(e){
+          msg.textContent = 'Network error while fetching bookings — showing local bookings.';
+        }
+      }
+
+      // Fallback: local bookings (for guest / offline)
+      let localList = [];
+      try{
+        localList = JSON.parse(localStorage.getItem('gowithus_local_bookings') || '[]');
+      }catch(e){ localList = []; }
+
+      if (!localList || !localList.length){
+        noBookings.style.display = 'block';
+        return;
+      }
+
+      const mapped = localList.map((b, i) => ({
+        id: b.id || ('local-'+i),
+        destination: b.destination || {},
+        full_name: b.full_name,
+        email: b.email,
+        phone: b.phone,
+        check_in: b.check_in,
+        check_out: b.check_out,
+        total_price: b.total_price,
+        status: b.status || 'confirmed',
+        accommodation_type: b.accommodation_type,
+        special_requests: b.special_requests
+      }));
+      renderList(container, mapped);
+    }
+
+    // ------------ render + buttons -------------
+    function renderList(container, list){
+      container.innerHTML = '';
+      list.forEach(b => {
+        const img = (b.destination && (b.destination.image_url || b.destination.image)) || '/static/images/placeholder.jpg';
+        const title = (b.destination && b.destination.name) || 'Destination';
+        const location = (b.destination && b.destination.location) || '';
+        const price = b.total_price ? '₹' + Number(b.total_price).toLocaleString() : '—';
+        const status = b.status || 'confirmed';
+        const id = b.id;
+        const isCancelled = String(status).toLowerCase() === 'cancelled';
+
+        const phone = b.phone || '';
+        const accom = b.accommodation_type || '';
+        const req = b.special_requests || '';
+
+        const el = document.createElement('div');
+        el.className = 'booking-card';
+        el.innerHTML = `
+          <img src="${img}" alt="${escapeHtml(title)}">
+          <div class="booking-meta">
+            <h3>${escapeHtml(title)}</h3>
+            <div class="muted small">${escapeHtml(location)}</div>
+            <div class="pad small">
+              Guest: <strong>${escapeHtml(b.full_name)}</strong> • ${escapeHtml(b.email)}
+              ${phone ? ' • Phone: <strong>' + escapeHtml(phone) + '</strong>' : ''}
+            </div>
+            <div class="pad small">
+              Check-in: <strong>${escapeHtml(b.check_in)}</strong>
+              • Check-out: <strong>${escapeHtml(b.check_out)}</strong>
+            </div>
+            ${accom ? `<div class="pad small">Accommodation: <strong>${escapeHtml(accom)}</strong></div>` : ''}
+            ${req ? `<div class="pad small">Special requests: ${escapeHtml(req)}</div>` : ''}
+            <div class="muted small">Status: <strong>${escapeHtml(status)}</strong></div>
+          </div>
+          <div class="actions">
+            <div class="price">${price}</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn small" data-action="invoice" data-id="${escapeHtml(id)}">Download Invoice</button>
+              <button class="btn small" data-action="cancel" data-id="${escapeHtml(id)}"
+                      ${isCancelled ? 'disabled style="opacity:0.5;cursor:default;"' : ''}>
+                ${isCancelled ? 'Cancelled' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+
+      // Invoice buttons
+      container.querySelectorAll('button[data-action="invoice"]').forEach(btn => {
+        btn.addEventListener('click', async function(){
+          const id = this.dataset.id;
+          const uid = localStorage.getItem('gowithus_user_id');
+          try{
+            const headers = {};
+            if (uid) headers['X-User-Id'] = uid;
+            const res = await fetch('/api/invoice/' + encodeURIComponent(id), { headers });
+            if (!res.ok){
+              const j = await res.json().catch(()=>({}));
+              alert(j.error || 'Failed to fetch invoice');
+              return;
+            }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice_' + id + '.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          }catch(e){
+            alert('Network error while downloading invoice');
+          }
+        });
+      });
+
+      // Cancel buttons
+      container.querySelectorAll('button[data-action="cancel"]').forEach(btn => {
+        btn.addEventListener('click', async function(){
+          if (this.disabled) return;
+          const id = this.dataset.id;
+          if (!confirm('Cancel this booking?')) return;
+
+          // 1) Update local bookings
+          let arr = [];
+          try{
+            arr = JSON.parse(localStorage.getItem('gowithus_local_bookings') || '[]');
+          }catch(e){ arr = []; }
+
+          let changed = false;
+          arr.forEach(b => {
+            if (String(b.id) === String(id)) {
+              b.status = 'cancelled';
+              changed = true;
+            }
+          });
+          if (changed) {
+            localStorage.setItem('gowithus_local_bookings', JSON.stringify(arr));
+          }
+
+          // 2) Try server cancel (if logged in)
+          const uid = localStorage.getItem('gowithus_user_id');
+          if (uid){
+            try{
+              await fetch('/api/cancel/' + encodeURIComponent(id), {
+                method:'POST',
+                headers:{'X-User-Id':uid}
+              });
+            }catch(e){
+              // ignore; UI already updated
+            }
+          }
+
+          // 3) Refresh UI
+          loadBookings('#bookings-container');
+        });
+      });
+    }
+
+    // init
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshUserUI();
+      loadBookings('#bookings-container');
+    });
+
+    window.addEventListener('storage', e => {
+      if (['gowithus_local_bookings','gowithus_user_id','gowithus_user_name'].includes(e.key)){
+        refreshUserUI();
+        loadBookings('#bookings-container');
+      }
+    });
+  </script>
+</body>
+</html>

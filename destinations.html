@@ -1,0 +1,414 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Destinations — GoWithUs</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    :root{
+      --page-max: 1150px;
+    }
+    body{
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:#f8fafc;
+    }
+
+    /* Header */
+    header.site-header{
+      background:#fff;
+      box-shadow:0 1px 4px rgba(15,23,42,0.06);
+    }
+    header .header-inner{
+      max-width:var(--page-max);
+      margin:0 auto;
+      padding:10px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    /* HERO with search */
+    .hero-explore{
+      background:linear-gradient(135deg,#f97316,#ec4899);
+      padding:26px 0 40px;
+      color:#fff;
+    }
+    .hero-inner{
+      max-width:var(--page-max);
+      margin:0 auto;
+      padding:0 16px;
+      display:grid;
+      grid-template-columns: minmax(0,1.4fr) minmax(0,1fr);
+      gap:20px;
+      align-items:center;
+    }
+    .hero-title{
+      font-size:32px;
+      font-weight:800;
+      margin-bottom:6px;
+    }
+    .hero-sub{
+      font-size:14px;
+      max-width:420px;
+      opacity:0.95;
+    }
+
+    .hero-search-card{
+      background:#fff;
+      border-radius:18px;
+      padding:16px 18px;
+      box-shadow:0 16px 40px rgba(15,23,42,0.35);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .hero-search-label{
+      font-size:13px;
+      font-weight:600;
+      color:#64748b;
+      text-transform:uppercase;
+      letter-spacing:0.16em;
+    }
+    .hero-search-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .hero-search-input{
+      flex:1;
+      border-radius:999px;
+      border:none;
+      padding:10px 14px;
+      font-size:14px;
+      background:#f1f5f9;
+      outline:none;
+    }
+    .hero-search-btn{
+      border:none;
+      border-radius:999px;
+      padding:9px 16px;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      background:linear-gradient(135deg,#f97316,#ec4899);
+      color:#fff;
+      box-shadow:0 10px 24px rgba(236,72,153,0.45);
+      white-space:nowrap;
+    }
+
+    .hero-badge-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size:13px;
+      color:#64748b;
+    }
+    .hero-badge-row strong{
+      color:#0f172a;
+    }
+
+    /* AI Recommendations strip */
+    .ai-strip{
+      max-width:var(--page-max);
+      margin:18px auto 0;
+      padding:0 16px;
+    }
+    .ai-card{
+      background:linear-gradient(135deg,#fb923c,#f97316);
+      border-radius:18px;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color:#fff;
+      box-shadow:0 12px 28px rgba(239,68,68,0.35);
+    }
+    .ai-card-title{
+      font-weight:700;
+      font-size:16px;
+    }
+    .ai-card-sub{
+      font-size:13px;
+      opacity:0.95;
+      margin-top:2px;
+    }
+    .ai-icon{
+      font-size:24px;
+      margin-right:8px;
+    }
+    .btn-ai{
+      border:none;
+      border-radius:999px;
+      padding:8px 14px;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      background:#fff;
+      color:#f97316;
+    }
+
+    /* Layout: recommendations + all destinations */
+    main.page-main{
+      max-width:var(--page-max);
+      margin:14px auto 40px;
+      padding:0 16px;
+      display:grid;
+      grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr);
+      gap:18px;
+      align-items:flex-start;
+    }
+
+    .panel{
+      background:#fff;
+      border-radius:18px;
+      padding:14px 16px 18px;
+      box-shadow:0 10px 26px rgba(15,23,42,0.08);
+      border:1px solid #e5e7eb;
+    }
+    .panel h2{
+      margin:0 0 6px;
+      font-size:18px;
+    }
+    .muted{
+      color:#64748b;
+      font-size:13px;
+    }
+
+    /* destination cards */
+    .dest-grid{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+      gap:14px;
+    }
+    .dest-card{
+      border-radius:16px;
+      background:#f9fafb;
+      overflow:hidden;
+      border:1px solid #e5e7eb;
+      display:flex;
+      flex-direction:column;
+    }
+    .dest-card img{
+      width:100%;
+      height:150px;
+      object-fit:cover;
+      display:block;
+    }
+    .dest-body{
+      padding:10px 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      font-size:13px;
+    }
+    .dest-title{
+      font-size:15px;
+      font-weight:700;
+    }
+    .dest-location{
+      color:#64748b;
+    }
+    .dest-price{
+      font-weight:700;
+      margin-top:4px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      font-size:11px;
+      border-radius:999px;
+      padding:3px 8px;
+      background:#eff6ff;
+      color:#1d4ed8;
+    }
+
+    @media (max-width:960px){
+      .hero-inner{
+        grid-template-columns:1fr;
+      }
+      main.page-main{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width:640px){
+      .hero-title{ font-size:24px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/static/index.html" style="font-weight:800;color:#ec4899;text-decoration:none;font-size:18px;">GoWithUs</a>
+      <nav class="site-nav">
+        <a href="/static/index.html">Home</a>
+        <a href="/static/destinations.html" class="active">Destinations</a>
+        <a href="/static/my_bookings.html">My Bookings</a>
+        <a href="/static/profile.html">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero with search -->
+  <section class="hero-explore">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-title">Explore Destinations</div>
+        <div class="hero-sub">
+          Find your perfect getaway from our curated collection of destinations across India, tailored to your travel style.
+        </div>
+      </div>
+      <div class="hero-search-card">
+        <div class="hero-search-label">Search destinations</div>
+        <form id="search-form" class="hero-search-row">
+          <input id="search-input" class="hero-search-input" type="text"
+                 placeholder="Search destinations, countries, cities..." />
+          <button class="hero-search-btn" type="submit">Search</button>
+        </form>
+        <div class="hero-badge-row">
+          <span>🔍 Tip: Try “beach”, “mountain”, “temple”, etc.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Recommendations strip -->
+  <section class="ai-strip">
+    <div class="ai-card">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <div class="ai-icon">⚙️</div>
+        <div>
+          <div class="ai-card-title">AI Recommendations</div>
+          <div class="ai-card-sub">Destinations picked just for you based on your travel preferences.</div>
+        </div>
+      </div>
+      <button id="btn-ai" class="btn-ai" type="button">Get Recommendations</button>
+    </div>
+  </section>
+
+  <!-- Main content -->
+  <main class="page-main">
+    <!-- Left: AI recommendations list -->
+    <section class="panel">
+      <h2>Recommended for you</h2>
+      <div id="ai-msg" class="muted">Click “Get Recommendations” to see personalised suggestions.</div>
+      <div id="ai-grid" class="dest-grid"></div>
+    </section>
+
+    <!-- Right: all destinations -->
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <h2>All Destinations</h2>
+        <div class="muted"><span id="dest-count">0</span> destinations found</div>
+      </div>
+      <div id="dest-grid" class="dest-grid"></div>
+    </section>
+  </main>
+
+  <footer style="text-align:center;color:#64748b;font-size:13px;margin-bottom:16px;">
+    © GoWithUs — demo layout
+  </footer>
+
+  <script>
+    function escapeHtml(s){
+      if (s === undefined || s === null) return '';
+      return String(s).replace(/[&<>"']/g, m =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+      );
+    }
+
+    function makeCard(d){
+      const img = escapeHtml(d.image_url || '/static/images/placeholder.jpg');
+      const name = escapeHtml(d.name || 'Destination');
+      const loc = escapeHtml(d.location || '');
+      const price = d.price ? '₹' + Number(d.price).toLocaleString() + ' / night' : '—';
+      const cat = escapeHtml(d.category || '');
+      const rating = d.rating != null ? Number(d.rating).toFixed(1) : '4.5';
+
+      return `
+        <article class="dest-card">
+          <img src="${img}" alt="${name}">
+          <div class="dest-body">
+            <div class="dest-title">${name}</div>
+            <div class="dest-location">${loc}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+              <div class="dest-price">${price}</div>
+              <span class="badge">⭐ ${rating}</span>
+            </div>
+            ${cat ? `<div class="muted" style="font-size:12px;margin-top:2px;">Category: ${cat}</div>` : ''}
+          </div>
+        </article>
+      `;
+    }
+
+    async function loadDestinations(query=''){
+      const grid = document.getElementById('dest-grid');
+      const countEl = document.getElementById('dest-count');
+      grid.innerHTML = 'Loading...';
+      try{
+        const url = '/api/destinations' + (query ? ('?q=' + encodeURIComponent(query)) : '');
+        const res = await fetch(url);
+        const list = await res.json();
+        countEl.textContent = list.length || 0;
+        if (!list.length){
+          grid.innerHTML = '<div class="muted">No destinations match your search.</div>';
+          return;
+        }
+        grid.innerHTML = list.map(makeCard).join('');
+      }catch(e){
+        grid.innerHTML = '<div class="muted">Failed to load destinations.</div>';
+      }
+    }
+
+    async function loadRecommendations(){
+      const grid = document.getElementById('ai-grid');
+      const msg = document.getElementById('ai-msg');
+      grid.innerHTML = 'Loading...';
+      msg.textContent = '';
+      try{
+        const uid = localStorage.getItem('gowithus_user_id');
+        const headers = {};
+        if (uid) headers['X-User-Id'] = uid;
+        const res = await fetch('/api/recommendations', { headers });
+        if (!res.ok){
+          grid.innerHTML = '';
+          msg.textContent = 'Could not load recommendations.';
+          return;
+        }
+        const list = await res.json();
+        if (!list.length){
+          grid.innerHTML = '';
+          msg.textContent = 'No personalised recommendations yet. Try saving your preferences in the Profile page.';
+          return;
+        }
+        grid.innerHTML = list.map(makeCard).join('');
+        msg.textContent = 'Showing destinations tailored to your preferences.';
+      }catch(e){
+        grid.innerHTML = '';
+        msg.textContent = 'Network error while loading recommendations.';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // initial load (no query)
+      loadDestinations('');
+
+      // search handling
+      document.getElementById('search-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const q = document.getElementById('search-input').value.trim();
+        loadDestinations(q);
+      });
+
+      // AI button
+      document.getElementById('btn-ai').addEventListener('click', loadRecommendations);
+    });
+  </script>
+</body>
+</html>

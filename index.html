@@ -1,0 +1,55 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GoWithUs — Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="logo" href="/static/index.html" style="text-decoration:none;">
+        <span style="font-weight:800;color:var(--accent-b);font-size:18px">GoWithUs</span>
+      </a>
+      <nav class="site-nav">
+        <a href="/static/index.html" class="active">Home</a>
+        <a href="/static/destinations.html">Destinations</a>
+        <a href="/static/my_bookings.html">My Bookings</a>
+        <a href="/static/profile.html">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" style="background-image:url">
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="wrap hero-inner">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <h1>Discover Incredible<br><span style="display:inline-block;background:linear-gradient(90deg,#ff3cac,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">India</span></h1>
+          <p class="sub">Experience personalized travel recommendations powered by AI. Find perfect destinations across India tailored to your preferences.</p>
+          <div class="actions">
+            <a class="btn primary" href="/static/destinations.html">Explore Destinations →</a>
+            <a class="btn ghost" href="/static/my_bookings.html">My Bookings</a>
+          </div>
+        </div>
+        <div style="flex:1"></div>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap section featured-section">
+    <h2 style="text-align:right;margin:6px 0 0;color:#475569;">Featured Destinations</h2>
+    <p style="text-align:right;margin:6px 0 14px;color:var(--muted);">Handpicked destinations that match your travel dreams</p>
+    <div id="featured-grid" class="card-large-grid"></div>
+  </main>
+
+  <footer style="padding:28px 0;text-align:center;color:var(--muted);font-size:14px;">
+    © GoWithUs — demo layout
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', ()=>renderFeatured('#featured-grid',3));</script>
+</body>
+</html>

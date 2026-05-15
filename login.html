@@ -1,0 +1,77 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GoWithUs - Login</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+    <a class="logo" href="/static/index.html" style="text-decoration:none;">
+      <span style="font-weight:800;color:var(--accent-b);font-size:18px">GoWithUs</span>
+    </a>
+    <nav>
+      <a href="/static/index.html">Home</a>
+    </nav>
+  </header>
+
+  <main style="padding:30px;max-width:420px;margin:0 auto;">
+    <div class="card" style="padding:20px;">
+      <h2>Login</h2>
+      <form id="login-form">
+        <label>Email</label><br>
+        <input name="email" type="email" required class="input" style="width:100%;padding:8px;margin:8px 0;"><br>
+        <label>Password</label><br>
+        <input name="password" type="password" required class="input" style="width:100%;padding:8px;margin:8px 0;"><br>
+        <div style="margin-top:10px;"><button class="btn" type="submit">Log in</button></div>
+      </form>
+      <p style="margin-top:12px;color:#64748b;">Don't have an account? <a href="/static/register.html">Register</a></p>
+      <div id="msg" style="margin-top:8px;"></div>
+    </div>
+  </main>
+
+  <script>
+  document.getElementById('login-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const form = e.target;
+    const email = form.email.value.trim().toLowerCase();
+    const password = form.password.value;
+    const msg = document.getElementById('msg');
+    msg.style.color = '';
+    msg.textContent = 'Logging in...';
+
+    try {
+      const r = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const j = await r.json().catch(()=>({}));
+      if (!r.ok) {
+        msg.style.color = '#ef4444';
+        msg.textContent = (j && j.error) ? j.error : 'Login failed';
+        return;
+      }
+
+      const token = j.token || (j.user && j.user.id);
+      const user = j.user || {};
+
+      localStorage.setItem('gowithus_user_id', String(token));
+      localStorage.setItem('gowithus_user_name', user.name || '');
+      localStorage.setItem('gowithus_user_email', user.email || email);
+
+      msg.style.color = '#16a34a';
+      msg.textContent = 'Login successful! Redirecting...';
+
+      // After login go to Home
+      setTimeout(()=> location.href = '/static/index.html', 600);
+    } catch (err) {
+      console.error(err);
+      msg.style.color = '#ef4444';
+      msg.textContent = 'Network error';
+    }
+  });
+  </script>
+</body>
+</html>

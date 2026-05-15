@@ -1,0 +1,192 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile — GoWithUs</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .profile-grid{display:grid;grid-template-columns:260px 1fr;gap:22px;margin-top:18px}
+    .avatar{width:92px;height:92px;border-radius:999px;background:linear-gradient(90deg,var(--accent-b),var(--accent-a));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:28px}
+    .prefs{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .pref{padding:8px 12px;border-radius:12px;border:1px solid #f1f5f9;cursor:pointer}
+    .pref.active{background:linear-gradient(90deg,var(--accent-b),var(--accent-a));color:#fff;border-color:transparent;font-weight:700}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="logo" href="/static/index.html" style="text-decoration:none;">
+        <span style="font-weight:800;color:var(--accent-b);font-size:18px">GoWithUs</span>
+      </a>
+      <nav class="site-nav">
+        <a href="/static/index.html">Home</a>
+        <a href="/static/destinations.html">Destinations</a>
+        <a href="/static/my_bookings.html">My Bookings</a>
+        <a href="/static/profile.html" class="active">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap section">
+    <div class="profile-grid">
+      <div class="profile-card">
+        <div style="text-align:center">
+          <div id="avatar" class="avatar">G</div>
+          <h3 id="display-name" style="margin:12px 0 4px">Guest</h3>
+          <div id="display-email" class="muted small"></div>
+        </div>
+        <div style="margin-top:16px">
+          <strong>Saved preferences</strong>
+          <div id="prefs-list" class="prefs"></div>
+        </div>
+      </div>
+
+      <div>
+        <h2 style="margin-top:0">Profile & Travel Preferences</h2>
+
+        <label style="display:block;margin-top:12px;font-weight:700">Full name</label>
+        <input id="inp-name" class="input" style="width:100%;padding:10px;border-radius:10px;border:1px solid #f1f5f9"/>
+
+        <label style="display:block;margin-top:12px;font-weight:700">Email</label>
+        <input id="inp-email" type="email" class="input" style="width:100%;padding:10px;border-radius:10px;border:1px solid #f1f5f9"/>
+
+        <label style="display:block;margin-top:12px;font-weight:700">Phone</label>
+        <input id="inp-phone" type="tel" class="input" style="width:100%;padding:10px;border-radius:10px;border:1px solid #f1f5f9"/>
+
+        <div style="margin-top:18px">
+          <strong>Preferred destinations</strong>
+          <div class="prefs" id="prefs-grid" style="margin-top:8px"></div>
+        </div>
+
+        <div style="margin-top:18px;display:flex;gap:12px;align-items:center">
+          <button id="btn-save-server" class="btn primary">Save to account</button>
+          <button id="btn-save-local" class="btn">Save locally</button>
+          <div id="save-msg" class="muted small"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer style="padding:28px 0;text-align:center;color:var(--muted);font-size:14px;">© GoWithUs</footer>
+
+  <script>
+    const PREFS = ['Beach','Culture','Nature','Mountain','Luxury','City','Romantic','Adventure'];
+
+    function makePref(name){
+      const d = document.createElement('div');
+      d.className = 'pref';
+      d.textContent = name;
+      d.dataset.val = name.toLowerCase();
+      d.addEventListener('click', ()=> d.classList.toggle('active'));
+      return d;
+    }
+
+    function updateAvatar(name){
+      const a = document.getElementById('avatar');
+      const ch = (name||'G').trim().charAt(0).toUpperCase()||'G';
+      a.textContent = ch;
+      document.getElementById('display-name').textContent = name || 'Guest';
+    }
+
+    async function loadProfile(){
+      // build prefs UI
+      const pg = document.getElementById('prefs-grid');
+      pg.innerHTML='';
+      PREFS.forEach(p=> pg.appendChild(makePref(p)));
+
+      const pl = document.getElementById('prefs-list');
+      pl.innerHTML='';
+      PREFS.forEach(p=> pl.appendChild(makePref(p)));
+
+      // try server
+      const uid = localStorage.getItem('gowithus_user_id');
+      if (uid){
+        try {
+          const res = await fetch('/api/profile', { headers: { 'X-User-Id': uid }});
+          if (res.ok){
+            const j = await res.json();
+            const profile = j.profile || j.user || {};
+            document.getElementById('inp-name').value = profile.name || '';
+            document.getElementById('inp-email').value = profile.email || '';
+            document.getElementById('inp-phone').value = profile.phone || '';
+            updateAvatar(profile.name);
+            const prefs = profile.preferences || profile.prefs || [];
+            document.querySelectorAll('.pref').forEach(el=>{
+              if (prefs.map(p=>p.toLowerCase()).includes(el.dataset.val)) el.classList.add('active');
+            });
+            document.getElementById('display-email').textContent = profile.email || '';
+            return;
+          }
+        } catch(e){}
+      }
+
+      // fallback local
+      const local = JSON.parse(localStorage.getItem('gowithus_local_profile')||'{}');
+      document.getElementById('inp-name').value = local.name || '';
+      document.getElementById('inp-email').value = local.email || '';
+      document.getElementById('inp-phone').value = local.phone || '';
+      updateAvatar(local.name);
+      document.getElementById('display-email').textContent = local.email || '';
+      (local.preferences||[]).forEach(p=>{
+        document.querySelectorAll('.pref').forEach(el=>{
+          if (el.dataset.val===p) el.classList.add('active');
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      loadProfile();
+
+      document.getElementById('btn-save-local').addEventListener('click', ()=>{
+        const profile = {
+          name: document.getElementById('inp-name').value.trim(),
+          email: document.getElementById('inp-email').value.trim(),
+          phone: document.getElementById('inp-phone').value.trim(),
+          preferences: Array.from(document.querySelectorAll('.pref.active')).map(e=>e.dataset.val)
+        };
+        localStorage.setItem('gowithus_local_profile', JSON.stringify(profile));
+        document.getElementById('save-msg').textContent = 'Saved locally';
+        setTimeout(()=>document.getElementById('save-msg').textContent='',2000);
+        updateAvatar(profile.name);
+      });
+
+      document.getElementById('btn-save-server').addEventListener('click', async ()=>{
+        const uid = localStorage.getItem('gowithus_user_id');
+        if (!uid){
+          if (confirm('You are not signed in. Go to login page?')) location.href = '/static/login.html';
+          return;
+        }
+        const profile = {
+          name: document.getElementById('inp-name').value.trim(),
+          email: document.getElementById('inp-email').value.trim(),
+          phone: document.getElementById('inp-phone').value.trim(),
+          preferences: Array.from(document.querySelectorAll('.pref.active')).map(e=>e.dataset.val)
+        };
+        try {
+          const res = await fetch('/api/profile', {
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json',
+              'X-User-Id':uid
+            },
+            body: JSON.stringify(profile)
+          });
+          const j = await res.json();
+          if (!res.ok){
+            document.getElementById('save-msg').textContent = j.error || 'Failed';
+            return;
+          }
+          document.getElementById('save-msg').textContent = 'Saved to account';
+          updateAvatar(profile.name);
+          localStorage.setItem('gowithus_user_name', profile.name || '');
+          localStorage.setItem('gowithus_user_email', profile.email || '');
+          setTimeout(()=>document.getElementById('save-msg').textContent='',2000);
+        } catch(e){
+          document.getElementById('save-msg').textContent = 'Network error';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

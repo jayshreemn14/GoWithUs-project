@@ -1,0 +1,50 @@
+﻿<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Register — GoWithUs</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+   <a class="logo" href="/static/index.html" style="text-decoration:none;">
+      <span style="font-weight:800;color:var(--accent-b);font-size:18px">GoWithUs</span>
+    </a>
+  <main class="container" style="padding:32px;">
+    <h1>Register</h1>
+    <form id="register-form" style="max-width:420px;display:grid;gap:10px;">
+      <input type="text" id="name" placeholder="Full name" required class="input">
+      <input type="email" id="email" placeholder="Email" required class="input">
+      <input type="password" id="password" placeholder="Password" required class="input">
+      <button type="submit" class="btn">Register</button>
+    </form>
+    <p style="margin-top:12px;">Already have account? <a href="/static/login.html">Login</a></p>
+    <div id="reg-msg" style="margin-top:12px;"></div>
+  </main>
+
+  <script src="/static/js/auth.js"></script>
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const msgEl = document.getElementById('reg-msg');
+
+      msgEl.style.color = '#64748b'; msgEl.textContent = 'Registering...';
+      const res = await apiRegister(name, email, password);
+      if (res.ok) {
+        // store user info
+        localStorage.setItem('gowithus_user_id', String(res.user.id));
+        localStorage.setItem('gowithus_user', JSON.stringify({name: res.user.name || name, email: res.user.email || email}));
+        msgEl.style.color = '#16a34a';
+        msgEl.textContent = 'Registered — redirecting to My Bookings...';
+        setTimeout(()=> location.href = '/static/my_bookings.html', 700);
+      } else {
+        msgEl.style.color = '#ef4444';
+        msgEl.textContent = res.error || 'Registration failed';
+      }
+    });
+  </script>
+</body>
+</html>
