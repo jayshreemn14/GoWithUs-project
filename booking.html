@@ -1,0 +1,72 @@
+﻿<!doctype html>
+<html><head>
+<meta charset="utf-8"><title>Book</title>
+<link rel="stylesheet" href="/static/style.css">
+</head><body>
+<header class="header">
+  <a class="logo" href="/"><img src="/static/images/logo.jpg" alt="logo"> <strong>GoWithUs</strong></a>
+  <nav class="nav"><a href="/">Home</a><a href="/destinations.html">Destinations</a></nav>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div id="booking-area" class="pad"></div>
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const destId = params.get("dest");
+const area = document.getElementById("booking-area");
+
+function getUserToken(){
+  return localStorage.getItem("gow_user_token");
+}
+
+function showForm(d){
+  const today = new Date().toISOString().slice(0,10);
+  area.innerHTML = `
+    <h2>Book ${d.name}</h2>
+    <p class="small">${d.location} â€¢ â‚¹${Number(d.price).toLocaleString()} / night</p>
+    <form id="bookForm" style="display:grid;gap:10px;max-width:520px;">
+      <input class="input" name="full_name" placeholder="Full name" required>
+      <input class="input" name="email" placeholder="Email" required>
+      <input class="input" type="number" name="guests" value="1" min="1" required>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1"><label>Check-in</label><input class="input" type="date" name="check_in" value="${today}" min="${today}" required></div>
+        <div style="flex:1"><label>Check-out</label><input class="input" type="date" name="check_out" min="${today}" required></div>
+      </div>
+      <button class="btn" type="submit">Confirm Booking</button>
+    </form>
+  `;
+  document.getElementById("bookForm").addEventListener("submit", async (ev)=>{
+    ev.preventDefault();
+    const form = new FormData(ev.target);
+    const payload = {
+      destination_id: d.id,
+      full_name: form.get("full_name"),
+      email: form.get("email"),
+      guests: Number(form.get("guests")),
+      check_in: form.get("check_in"),
+      check_out: form.get("check_out")
+    };
+    const token = getUserToken();
+    const headers = { "Content-Type":"application/json" };
+    if (token) headers["X-User-Id"] = token;
+    const res = await fetch("/api/book", { method:"POST", headers, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || "Booking failed"); return; }
+    alert("Booked! Booking ID: " + data.booking_id);
+    location.href = "/profile.html";
+  });
+}
+
+if (!destId) area.innerHTML = "<p>No destination selected</p>";
+else {
+  fetch("/api/destination/" + destId).then(r=>r.json()).then(d=>{
+    showForm(d);
+  });
+}
+</script>
+</body></html>

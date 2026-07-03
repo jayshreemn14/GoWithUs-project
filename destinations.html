@@ -1,0 +1,119 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Destinations — GoWithUs</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="logo" href="/static/index.html" style="text-decoration:none;">
+        <span style="font-weight:800;color:var(--accent-b);font-size:18px">GoWithUs</span>
+      </a>
+      <nav class="site-nav">
+        <a href="/static/index.html">Home</a>
+        <a href="/static/destinations.html" class="active">Destinations</a>
+        <a href="/static/my_bookings.html">My Bookings</a>
+        <a href="/static/profile.html">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" style="background-image:url; height:360px;">
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="wrap hero-inner">
+      <div class="hero-grid" style="align-items:center">
+        <div style="max-width:720px;padding:28px 0">
+          <h1 style="font-size:42px;margin:0;color:#fff">Explore Destinations</h1>
+          <p class="sub" style="max-width:640px">Search and discover top places — AI-powered recommendations appear when you save preferences in Profile.</p>
+        </div>
+        <div style="text-align:right">
+          <a class="btn primary" href="/static/profile.html">Set Travel Preferences</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap section">
+    <div style="display:flex;justify-content:space-between;align-items:end">
+      <div>
+        <h2 style="margin:0">AI Recommendations</h2>
+        <div class="muted">Destinations picked based on your saved travel preferences (or top rated).</div>
+      </div>
+      <div>
+        <button id="btn-refresh" class="btn">Refresh</button>
+      </div>
+    </div>
+
+    <div id="recommend-grid" class="grid-featured" style="margin-top:18px"></div>
+
+    <hr style="margin:36px 0;border:none;border-top:1px solid #f1f5f9">
+
+    <h2 style="margin:0 0 8px">All Destinations</h2>
+    <div id="all-grid" class="grid-featured" style="margin-top:18px"></div>
+  </main>
+
+  <footer style="padding:28px 0;text-align:center;color:var(--muted);font-size:14px;">
+    © GoWithUs
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+  <script>
+    async function renderCardInto(container, d){
+      const el = document.createElement('article');
+      el.className = 'card-compact';
+      el.innerHTML = `
+        <img src="${d.image_url||'/images/placeholder.jpg'}" alt="${escapeHtml(d.name)}">
+        <div class="pad">
+          <div style="display:flex;justify-content:space-between;align-items:start">
+            <div>
+              <h3 style="margin:0 0 6px">${escapeHtml(d.name)}</h3>
+              <div class="muted small">${escapeHtml(d.location||'')}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800">${formatPrice(d.price)}</div>
+              <div class="muted small">per night</div>
+            </div>
+          </div>
+          <p class="muted small" style="margin-top:8px">${escapeHtml((d.description||'').slice(0,140))}</p>
+        </div>
+      `;
+      el.addEventListener('click', ()=> window.location.href = '/static/destination_detail.html?dest=' + encodeURIComponent(d.id));
+      container.appendChild(el);
+    }
+
+    async function populateAll(){
+      const grid = document.getElementById('all-grid');
+      grid.innerHTML = '';
+      const list = await fetchDestinations();
+      list.forEach(d=> renderCardInto(grid, d));
+    }
+
+    async function populateRecs(){
+      const grid = document.getElementById('recommend-grid');
+      grid.innerHTML = '<div class="muted">Loading…</div>';
+      try {
+        const headers = {};
+        const uid = localStorage.getItem('gowithus_user_id');
+        if (uid) headers['X-User-Id'] = uid;
+        const res = await fetch('/api/recommendations', { headers });
+        if (!res.ok) throw new Error('no recs');
+        const recs = await res.json();
+        grid.innerHTML = '';
+        if (!recs.length) { grid.innerHTML = '<div class="muted">No recommendations available.</div>'; return; }
+        recs.slice(0,6).forEach(r => renderCardInto(grid, r));
+      } catch(e){
+        grid.innerHTML = '<div class="muted">Failed to load recommendations.</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      populateRecs();
+      populateAll();
+      document.getElementById('btn-refresh').addEventListener('click', ()=>{ populateRecs(); });
+    });
+  </script>
+</body>
+</html>
